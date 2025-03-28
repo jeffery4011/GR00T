@@ -240,6 +240,31 @@ class VideoTransform(ModalityTransform):
         )
 
 
+class VideoCropSquare(VideoTransform):
+    height: int | None = Field(default=None, description="The height of the input image")
+    width: int | None = Field(default=None, description="The width of the input image")
+
+    def get_transform(self, mode: Literal["train", "eval"] = "train") -> Callable:
+        """Get the transform for the given mode.
+
+        Args:
+            mode (Literal["train", "eval"]): The mode to get the transform for.
+
+        Returns:
+            Callable: If mode is "train", return a random crop transform. If mode is "eval", return a center crop transform.
+        """
+        assert (
+            len(set(self.original_resolutions.values())) == 1
+        ), f"All video keys must have the same resolution, got: {self.original_resolutions}"
+        crop_size = min(self.height, self.width)
+        if self.backend == "torchvision":
+            return T.CenterCrop(crop_size)
+        elif self.backend == "albumentations":
+            return A.CenterCrop(height=crop_size, width=crop_size, p=1)
+        else:
+            raise ValueError(f"Backend {self.backend} not supported")
+
+
 class VideoCrop(VideoTransform):
     height: int | None = Field(default=None, description="The height of the input image")
     width: int | None = Field(default=None, description="The width of the input image")

@@ -445,6 +445,7 @@ class LeRobotSingleDataset(Dataset):
                     continue  # no need for any metadata for lapa actions because it comes normalized
                 # Check if the key is valid
                 try:
+                    print(f"Checking key {key} in modality metadata")
                     self.lerobot_modality_meta.get_key_meta(key)
                 except Exception as e:
                     raise ValueError(

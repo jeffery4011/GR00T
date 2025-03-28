@@ -117,6 +117,18 @@ def calc_mse_for_single_trajectory(
             ax.legend()
 
         plt.tight_layout()
-        plt.show()
+        plt.savefig(f"eval/trajectory_{traj_id}.png")
+        plt.close()
 
+
+        # plot scatter plot of the 2d traj in x-y, z-y, x-z plane
+        fig, axes = plt.subplots(nrows=3, ncols=1, figsize=(8, 12))
+        indices = [(0, 1), (2, 1), (0, 2)]
+        for i, ax in enumerate(axes):
+            ax.scatter(gt_action_joints_across_time[:, indices[i][0]], gt_action_joints_across_time[:, indices[i][1]], color='red') # set color to red
+            ax.scatter(pred_action_joints_across_time[:, indices[i][0]], pred_action_joints_across_time[:, indices[i][1]], color='blue') # set color to blue
+            ax.set_title(f"Trajectory {traj_id} - {['x-y', 'z-y', 'x-z'][i]} plane")
+        plt.tight_layout()
+        plt.savefig(f"eval/trajectory_{traj_id}_scatter.png")
+        plt.close()
     return mse

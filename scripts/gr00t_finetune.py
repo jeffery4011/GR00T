@@ -46,7 +46,7 @@ class Config:
     """Data configuration name from DATA_CONFIG_MAP."""
 
     # Training parameters
-    batch_size: int = 16
+    batch_size: int = 32
     """Batch size per GPU for training."""
 
     max_steps: int = 10000
@@ -84,7 +84,7 @@ class Config:
     weight_decay: float = 1e-5
     """Weight decay for AdamW optimizer."""
 
-    warmup_ratio: float = 0.05
+    warmup_ratio: float = 0.01
     """Ratio of total training steps used for warmup."""
 
     lora_rank: int = 0
@@ -96,7 +96,7 @@ class Config:
     lora_dropout: float = 0.1
     """Dropout rate for the LORA model."""
 
-    dataloader_num_workers: int = 8
+    dataloader_num_workers: int = 16
     """Number of workers for data loading."""
 
     report_to: str = "wandb"
@@ -236,7 +236,7 @@ if __name__ == "__main__":
         else:
             # Multi-GPU mode - use torchrun
             script_path = Path(__file__).absolute()
-            # Remove any existing CUDA_VISIBLE_DEVICES from environment
+            # # Remove any existing CUDA_VISIBLE_DEVICES from environment
             if "CUDA_VISIBLE_DEVICES" in os.environ:
                 del os.environ["CUDA_VISIBLE_DEVICES"]
 

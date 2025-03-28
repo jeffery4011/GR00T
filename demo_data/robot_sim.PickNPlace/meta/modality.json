@@ -1,6 +1,7 @@
 {
     "state": {
         "left_arm": {
+            "original_key": "action",
             "start": 0,
             "end": 7
         },

@@ -29,15 +29,16 @@ warnings.simplefilter("ignore", category=FutureWarning)
 """
 Example command:
 
-python scripts/eval_policy.py --host localhost --port 5555 --plot
-    --modality_keys right_arm right_hand
-    --steps 250
-    --trajs 1000
-    --action_horizon 16
-    --video_backend decord
-    --dataset_path demo_data/robot_sim.PickNPlace/
-    --embodiment_tag gr1
-    --data_config gr1_arms_waist
+python scripts/eval_policy.py --host localhost --port 5555 --plot\
+    --modality_keys left_arm_eef_pos right_arm_eef_pos\
+    --steps 250\
+    --trajs 5\
+    --action_horizon 16\
+    --video_backend decord\
+    --dataset_path /scratch/hsy/Isaac-GR00T/data/xarm_dual/pour_1000/\
+    --embodiment_tag xarm_dual\
+    --data_config xarm_dual\
+    --model_path /scratch/hsy/Isaac-GR00T/outputs/gr00t-1/finetuned-model/checkpoint-39000/
 provide --model_path to load up the model checkpoint in this script.
 """
 
@@ -75,6 +76,7 @@ if __name__ == "__main__":
 
     data_config = DATA_CONFIG_MAP[args.data_config]
     if args.model_path is not None:
+        print("Loading model from", args.model_path)
         import torch
 
         modality_config = data_config.modality_config()

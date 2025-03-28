@@ -1,6 +1,11 @@
 # C extensions
 *.so
 
+data
+data/
+outputs/
+outputs_1/
+
 # Distribution / packaging
 .Python
 build/
@@ -30,6 +35,7 @@ build/
 dist/
 pip-wheel-metadata/
 
+outputs/
 
 # dev tools
 
