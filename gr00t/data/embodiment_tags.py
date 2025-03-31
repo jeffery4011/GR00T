@@ -26,8 +26,3 @@ class EmbodimentTag(Enum):
     """
     Any new embodiment for finetuning.
     """
-
-    XARM_DUAL = "xarm_dual"
-    """
-    The XArm dual arm embodiment.
-    """

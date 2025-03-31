@@ -3,13 +3,13 @@ from gr00t.data.embodiment_tags import EmbodimentTag
 from gr00t.data.dataset import ModalityConfig
 from gr00t.experiment.data_config import DATA_CONFIG_MAP
 
-dataset_path = "data/xarm_dual/pour_1000"
+dataset_path = "data/xarm_dual/pour_1000_joint"
 
 # get the data config
 embodiment_tag = EmbodimentTag("new_embodiment")
 
 # 1.1 modality configs and transforms
-data_config_cls = DATA_CONFIG_MAP["new_embodiment"]
+data_config_cls = DATA_CONFIG_MAP["new_embodiment_joint"]
 modality_configs = data_config_cls.modality_config()
 transforms = data_config_cls.transform()
 
@@ -29,9 +29,8 @@ for key, value in batch.items():
         print(key, value.shape, value.min(), value.max())
     except:
         print(key, value)
-# print(batch["state.left_arm"])
-# print(batch["action.left_arm"])
 
+print(batch["action"][0])
 # imgs = batch["pixel_values"]
 # import matplotlib.pyplot as plt
 # import torch

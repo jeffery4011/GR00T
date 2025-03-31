@@ -39,10 +39,10 @@ class Config:
     dataset_path: str
     """Path to the dataset directory."""
 
-    output_dir: str = "/tmp/gr00t"
+    output_dir: str = "./tmp/gr00t"
     """Directory to save model checkpoints."""
 
-    data_config: str = "gr1_arms_only"
+    data_config: str = "new_embodiment"
     """Data configuration name from DATA_CONFIG_MAP."""
 
     # Training parameters
@@ -55,7 +55,7 @@ class Config:
     num_gpus: int = 1
     """Number of GPUs to use for training."""
 
-    save_steps: int = 500
+    save_steps: int = 1000
     """Number of steps between saving checkpoints."""
 
     # Model parameters
@@ -183,7 +183,7 @@ def main(config: Config):
         save_strategy="steps",
         save_steps=config.save_steps,
         evaluation_strategy="no",
-        save_total_limit=8,
+        save_total_limit=20,
         report_to=config.report_to,
         seed=42,
         do_eval=False,
