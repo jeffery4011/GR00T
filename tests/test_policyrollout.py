@@ -1,13 +1,11 @@
 import numpy as np
-from pathlib import Path
-from gr00t.data.dataset import ModalityConfig, DatasetMetadata
-from gr00t.data.embodiment_tags import EmbodimentTag
-from gr00t.utils.misc import any_describe
+import torch
 from gr00t.experiment.data_config import DATA_CONFIG_MAP
-from gr00t.data.dataset import LeRobotSingleDataset
+from gr00t.model.policy import Gr00tPolicy
+from gr00t.data.transform.obs_buffer import ObsBufferTransform
 def create_test_observation_dict():
     # Set horizon length N
-    N = 1  # Using 10 timesteps as an example
+    N = 1  # Match the expected sequence length directly
     
     # Create fake image data (random values between 0-255 for RGB images)
     image_shape = (480, 640, 3)
@@ -40,36 +38,38 @@ def create_test_observation_dict():
     
     return observation_dict
 
-def test_dataset_with_transforms():
-    # 1. Create fake observation dictionary
-    obs_dict = create_test_observation_dict()
-    
-    # 2. Set up configs similar to test_dataset.py
-    embodiment_tag = EmbodimentTag("new_embodiment")
-    dataset_path = "/home/zhexin/data/xarm_dual/pour_1000"
-    
-    # 3. Get the data config and modality configs from DATA_CONFIG_MAP
-    data_config_cls = DATA_CONFIG_MAP["new_embodiment_joint"]
-    modality_configs = data_config_cls.modality_config()
-    transforms = data_config_cls.deployment_transform()
-    # Create dataset to get metadata
-    train_dataset = LeRobotSingleDataset(
-        dataset_path=dataset_path,
-        modality_configs=modality_configs,
-        transforms= transforms,
+def test_policy_rollout():
+    # Configuration
+    model_path = "/home/zhexin/ckpt/gr00t_pour1000_joint/checkpoint-20000"
+    embodiment_tag = "new_embodiment"
+    data_config = DATA_CONFIG_MAP["new_embodiment_joint"]
+
+    # Initialize policy with deployment_transform()
+    policy = Gr00tPolicy(
+        model_path=model_path,
+        modality_config=data_config.modality_config(),
+        modality_transform=data_config.deployment_transform(),
         embodiment_tag=embodiment_tag,
-        video_backend="decord",
+        device="cuda" if torch.cuda.is_available() else "cpu",
     )
-    transforms.set_metadata(train_dataset.metadata)
+
+    # Create single observation with proper sequence length
+    obs = create_test_observation_dict()
+
+    # for key in obs.keys():
+    #     print(key, obs[key].shape)
+    #obs = ObsBufferTransform(apply_to=["observation_images_head", "observation_images_left_wrist", "observation_images_right_wrist", "observation_states_ee_pose_left", "observation_states_joint_angle_left", "observation_states_gripper_position_left", "observation_states_ee_pose_right", "observation_states_joint_angle_right", "observation_states_gripper_position_right"]).apply(obs)
     
-    obs_dict = transforms(obs_dict)
+    # Get action from policy
+    action = policy.get_action(obs)
     
-    # 5. Print the transformed observation dictionary
-    for key, value in obs_dict.items():
-        try:
-            print(key, value.shape, value.min(), value.max(),'\n')
-        except:
-            print(key, value, value,'\n')
+    # Print action shape and values
+    print("\nAction outputs:")
+    for key, value in action.items():
+        if isinstance(value, np.ndarray):
+            print(f"{key}: shape={value.shape}, min={value.min():.3f}, max={value.max():.3f}")
+        else:
+            print(f"{key}: {value}")
 
 if __name__ == "__main__":
-    test_dataset_with_transforms()
+    test_policy_rollout()

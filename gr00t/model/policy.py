@@ -171,6 +171,7 @@ class Gr00tPolicy(BasePolicy):
         normalized_input = unsqueeze_dict_values
         # Apply transforms
         normalized_input = self.apply_transforms(observations)
+        #print(normalized_input)
 
         normalized_action = self._get_action_from_normalized_input(normalized_input)
         unnormalized_action = self._get_unnormalized_action(normalized_action)
@@ -226,8 +227,13 @@ class Gr00tPolicy(BasePolicy):
 
     def _check_state_is_batched(self, obs: Dict[str, Any]) -> bool:
         for k, v in obs.items():
-            if "state" in k and len(v.shape) < 3:  # (B, Time, Dim)
+            if "observation_image" in k and len(v.shape) < 5:
+                #print("Not batched")
                 return False
+            if "state" in k and len(v.shape) < 3 and "observation" not in k:  # (B, Time, Dim)
+                #print("Not batched")
+                return False
+        #print("Batched")
         return True
 
     def _load_model(self, model_path):

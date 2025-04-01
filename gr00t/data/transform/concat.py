@@ -101,13 +101,15 @@ class ConcatTransform(InvertibleModalityTransform):
             unsqueezed_videos = []
             for video_key in self.video_concat_order:
                 video_data = data.pop(video_key)
+                #print("Concatenate Check:")
+                #print(video_data.shape)
                 unsqueezed_video = np.expand_dims(
                     video_data, axis=-4
                 )  # [..., H, W, C] -> [..., 1, H, W, C]
                 unsqueezed_videos.append(unsqueezed_video)
             # Concatenate along the new axis
             unsqueezed_video = np.concatenate(unsqueezed_videos, axis=-4)  # [..., V, H, W, C]
-
+            #print(f"Unsqueezed Video Shape: {unsqueezed_video.shape}")
             # Video
             data["video"] = unsqueezed_video
 

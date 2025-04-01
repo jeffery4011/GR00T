@@ -170,7 +170,7 @@ class XarmDualJointDataConfig(BaseDataConfig):
         "observation_states_gripper_position_left",
         "observation_states_gripper_position_right",
     ]
-    obs_keys = obs_dict_video_keys + obs_dict_state_keys
+    
     video_keys = [
         "video.right_wrist_view",
         "video.left_wrist_view",
@@ -186,6 +186,8 @@ class XarmDualJointDataConfig(BaseDataConfig):
         "state.right_arm_joint_pos",
         "state.left_arm_joint_pos",
     ]
+    obs_keys = obs_dict_video_keys + obs_dict_state_keys #+ video_keys + state_keys
+    unapply_keys = video_keys + state_keys
     action_keys = [
         "action.right_arm_joint_pos",
         "action.right_gripper_close",
@@ -280,7 +282,7 @@ class XarmDualJointDataConfig(BaseDataConfig):
     def deployment_transform(self):
         transforms = [
             # video transforms
-            ObsBufferTransform(apply_to=self.obs_keys),
+            ObsBufferTransform(apply_to=self.obs_keys, unapply_to=self.unapply_keys),
             VideoToTensor(apply_to=self.video_keys),
             VideoCrop(apply_to=self.video_keys, scale=0.95),
             VideoCropSquare(apply_to=self.video_keys, height=456, width=456),
@@ -332,7 +334,12 @@ class XarmDualJointDataConfig(BaseDataConfig):
         ]
 
         return ComposedModalityTransform(transforms=transforms)
-
+    
+    def obs_transform(self):
+        transforms = [
+            ObsBufferTransform(apply_to=self.obs_keys),
+        ]
+        return ComposedModalityTransform(transforms=transforms)
 
 class XarmDualPosDataConfig(BaseDataConfig):
     video_keys = [

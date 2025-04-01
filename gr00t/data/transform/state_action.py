@@ -491,6 +491,7 @@ class StateActionTransform(InvertibleModalityTransform):
                 state = self._rotation_transformers[key].forward(state)
             # Normalize the state
             if key in self._normalizers:
+                #print(key, state.shape)
                 state = self._normalizers[key].forward(state)
             data[key] = state
         return data

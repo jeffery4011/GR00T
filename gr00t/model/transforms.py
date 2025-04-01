@@ -148,6 +148,7 @@ class GR00TTransform(InvertibleModalityTransform):
                 video: [T, V, H, W, C]
         """
         images = batch["images"]
+        #print(f"Apply GR00T Processing Check: {images.shape}")
         assert images.shape[0] == 1, "double check formatting when doing multi-time step"
         # Remove the singleton time dimension.
         images = images[0]
@@ -173,6 +174,7 @@ class GR00TTransform(InvertibleModalityTransform):
 
     def _prepare_video(self, data: dict):
         """Process, stack, and pad images from data['video']."""
+        #print(f"Prepare Video Check: {data['video'].shape}")
         return data["video"]  # [t v h w c]
 
     def _prepare_language(self, data: dict):
