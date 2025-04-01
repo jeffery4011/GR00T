@@ -3,7 +3,7 @@ from gr00t.data.embodiment_tags import EmbodimentTag
 from gr00t.data.dataset import ModalityConfig
 from gr00t.experiment.data_config import DATA_CONFIG_MAP
 
-dataset_path = "data/xarm_dual/pour_1000_joint"
+dataset_path = "/home/zhexin/data/xarm_dual/pour_1000"
 
 # get the data config
 embodiment_tag = EmbodimentTag("new_embodiment")
@@ -17,7 +17,7 @@ transforms = data_config_cls.transform()
 train_dataset = LeRobotSingleDataset(
     dataset_path=dataset_path,
     modality_configs=modality_configs,
-    transforms=transforms,
+    transforms=None,
     embodiment_tag=embodiment_tag,
     video_backend="decord",
 )
@@ -26,7 +26,7 @@ batch = train_dataset[0]
 
 for key, value in batch.items():
     try:
-        print(key, value.shape, value.min(), value.max())
+        print(key, value.shape, value.min(), value.max(),'\n')
     except:
         print(key, value)
 

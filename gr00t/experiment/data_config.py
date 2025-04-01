@@ -18,6 +18,7 @@ from abc import ABC, abstractmethod
 from gr00t.data.dataset import ModalityConfig
 from gr00t.data.transform.base import ComposedModalityTransform, ModalityTransform
 from gr00t.data.transform.concat import ConcatTransform
+from gr00t.data.transform.obs_buffer import ObsBufferTransform
 from gr00t.data.transform.state_action import StateActionToTensor, StateActionTransform
 from gr00t.data.transform.video import (
     VideoColorJitter,
@@ -156,6 +157,20 @@ class XarmDualDataConfig(BaseDataConfig):
 
 
 class XarmDualJointDataConfig(BaseDataConfig):
+    obs_dict_video_keys = [
+        "observation_images_head",
+        "observation_images_left_wrist",
+        "observation_images_right_wrist",
+    ]
+    obs_dict_state_keys = [
+        "observation_states_ee_pose_left",
+        "observation_states_ee_pose_right",
+        "observation_states_joint_angle_left",
+        "observation_states_joint_angle_right",
+        "observation_states_gripper_position_left",
+        "observation_states_gripper_position_right",
+    ]
+    obs_keys = obs_dict_video_keys + obs_dict_state_keys
     video_keys = [
         "video.right_wrist_view",
         "video.left_wrist_view",
@@ -210,6 +225,62 @@ class XarmDualJointDataConfig(BaseDataConfig):
     def transform(self):
         transforms = [
             # video transforms
+            VideoToTensor(apply_to=self.video_keys),
+            VideoCrop(apply_to=self.video_keys, scale=0.95),
+            VideoCropSquare(apply_to=self.video_keys, height=456, width=456),
+            VideoResize(apply_to=self.video_keys, height=224, width=224, interpolation="linear"),
+            VideoColorJitter(
+                apply_to=self.video_keys,
+                brightness=0.3,
+                contrast=0.4,
+                saturation=0.5,
+                hue=0.08,
+            ),
+            VideoToNumpy(apply_to=self.video_keys),
+            # state transforms
+            StateActionToTensor(apply_to=self.state_keys),
+            StateActionTransform(
+                apply_to=self.state_keys,
+                normalization_modes={
+                    "state.right_arm_eef_pos": "min_max",
+                    "state.right_gripper_qpos": "min_max",
+                    "state.left_arm_eef_pos": "min_max",
+                    "state.left_gripper_qpos": "min_max",
+                    "state.right_arm_joint_pos": "min_max",
+                    "state.left_arm_joint_pos": "min_max",
+                }
+            ),
+            # action transforms
+            StateActionToTensor(apply_to=self.action_keys),
+            StateActionTransform(
+                apply_to=self.action_keys,
+                normalization_modes={
+                    "action.right_arm_joint_pos": "min_max",
+                    "action.left_arm_joint_pos": "min_max",
+                    "action.right_gripper_close": "binary",
+                    "action.left_gripper_close": "binary",
+                },
+            ),
+            # concat transforms
+            ConcatTransform(
+                video_concat_order=self.video_keys,
+                state_concat_order=self.state_keys,
+                action_concat_order=self.action_keys,
+            ),
+            GR00TTransform(
+                state_horizon=len(self.observation_indices),
+                action_horizon=len(self.action_indices),
+                max_state_dim=64,
+                max_action_dim=32,
+            ),
+        ]
+
+        return ComposedModalityTransform(transforms=transforms)
+    
+    def deployment_transform(self):
+        transforms = [
+            # video transforms
+            ObsBufferTransform(apply_to=self.obs_keys),
             VideoToTensor(apply_to=self.video_keys),
             VideoCrop(apply_to=self.video_keys, scale=0.95),
             VideoCropSquare(apply_to=self.video_keys, height=456, width=456),
